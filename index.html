@@ -161,12 +161,12 @@
         }
 
         function openAdminPanel() {
-            const password = prompt("관리자 비밀번호를 입력하세요:");
-            if (password === "admin1234") {
+            const password = prompt("Digite a senha:");
+            if (password === "adm1234") {
                 document.getElementById("admin-popup").style.display = "block";
                 loadAdminBookings();
             } else {
-                alert("비밀번호가 틀렸습니다.");
+                alert("Senha incorreta.");
             }
         }
 
@@ -208,7 +208,7 @@
     </script>
 </head>
 <body>
-    <button id="admin-button" onclick="openAdminPanel()">관리자 모드</button>
+    <button id="admin-button" onclick="openAdminPanel()">ADM</button>
 
     <!-- 로그인 섹션 -->
     <div id="login-section">
