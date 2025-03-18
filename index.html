@@ -47,7 +47,7 @@
             width: 40%;
             border-left: 2px solid #ccc;
             padding-left: 20px;
-        }
+        } 
     </style>
     <script>
         // Firebase 설정
@@ -67,7 +67,27 @@
         document.addEventListener("DOMContentLoaded", function() {
         // 로그인 전에는 관리자 버튼 숨김
         document.getElementById("admin-button").style.display = "none";
+        generateTimeOptions();
     });
+
+            function generateTimeOptions() {
+            const timeSelect = document.getElementById("time");
+            timeSelect.innerHTML = ""; // 기존 옵션 초기화
+
+            let startHour = 6; // 시작 시간: 6시
+            let endHour = 12;  // 종료 시간: 12시
+            let interval = 8;  // 간격: 8분
+
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let minutes = 0; minutes < 60; minutes += interval) {
+                    let timeString = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                    let option = document.createElement("option");
+                    option.value = timeString;
+                    option.textContent = timeString;
+                    timeSelect.appendChild(option);
+                }
+            }
+        }        
 
         function googleLogin() {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -195,12 +215,7 @@
         <input type="date" id="date"><br>
 
         <label for="time">시간:</label>
-        <select id="time">
-            <option value="08:00">08:00</option>
-            <option value="09:00">09:00</option>
-            <option value="10:00">10:00</option>
-            <option value="11:00">11:00</option>
-        </select><br>
+        <select id="time"></select><br>
 
         <label for="people">인원수:</label>
         <input type="number" id="people" min="1" max="4"><br>
