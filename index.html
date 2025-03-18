@@ -14,7 +14,7 @@
             apiKey: "AIzaSyBXvjwzG6qpgW6W9H6-KBeXeJcqS1ZCdLA",
             authDomain: "reservation-344b6.firebaseapp.com",
             projectId: "reservation-344b6",
-            storageBucket: "reservation-344b6.firebasestorage.app",
+            storageBucket: "reservation-344b6.appspot.com",
             messagingSenderId: "191262639704",
             appId: "1:191262639704:web:2c51ae1636eda33cfa2c2d"
         };
@@ -24,8 +24,12 @@
         const db = firebase.firestore();
         
         // Google 로그인 함수
-        function googleLogin() {
-            const provider = new firebase.auth.GoogleAuthProvider();
+        const provider = new firebase.auth.GoogleAuthProvider();
+        if (/Mobi|Android/i.test(navigator.userAgent)) {
+            // 모바일 환경에서는 Redirect 방식 사용
+            auth.signInWithRedirect(provider);
+        } else {
+            // 데스크톱 환경에서는 Popup 방식 사용
             auth.signInWithPopup(provider).then(result => {
                 document.getElementById("login-section").style.display = "none";
                 document.getElementById("booking-section").style.display = "block";
@@ -38,26 +42,32 @@
 
         // 예약 신청 함수
         function bookTimeSlot() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("로그인이 필요합니다.");
-                return;
-            }
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            alert("로그인이 필요합니다.");
+            return;
+        }
 
-            const date = document.getElementById("date").value;
-            const time = document.getElementById("time").value;
-            const people = document.getElementById("people").value;
+        const date = document.getElementById("date").value;
+        const time = document.getElementById("time").value;
+        const people = document.getElementById("people").value;
+
+        if (!date || !time || !people) {
+            alert("날짜, 시간, 인원수를 입력해주세요.");
+            return;
+        }
 
             db.collection("bookings").add({
                 user: user.email,
                 date: date,
                 time: time,
-                people: people,
+                people: parseInt(people), // 숫자로 변환
                 status: "대기 중"
             }).then(() => {
-                alert("예약 요청이 완료되었습니다. 관리자의 승인을 기다려주세요.");
+                alert("예약 요청이 완료되었습니다.");
+                console.log("예약 성공:", date, time, people);
             }).catch(error => {
-                console.error("예약 오류: ", error);
+                console.error("예약 오류:", error);
             });
         }
 
@@ -103,7 +113,7 @@
 <body>
     <!-- 로그인 섹션 -->
     <div id="login-section">
-        <h2>Google 로그인[예약]</h2>
+        <h2>Google 로그인</h2>
         <button onclick="googleLogin()">Google 계정으로 로그인</button>
     </div>
     
