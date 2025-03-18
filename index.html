@@ -115,9 +115,12 @@
             const date = document.getElementById("date").value;
             const time = document.getElementById("time").value;
             const people = document.getElementById("people").value;
+            const memberId = document.getElementById("member-id").value;
+            const reserverName = document.getElementById("reserver-name").value;
+            const remarks = document.getElementById("remarks").value;
 
-            if (!date || !time || !people) {
-                alert("날짜, 시간, 인원수를 입력해주세요.");
+            if (!date || !time || !people || !memberId || !reserverName) {
+                alert("모든 필드를 입력해주세요.");
                 return;
             }
 
@@ -126,6 +129,9 @@
                 date: date,
                 time: time,
                 people: parseInt(people),
+                memberId: memberId,
+                reserverName: reserverName,
+                remarks: remarks,
                 status: "대기 중"
             }).then(() => {
                 alert("예약 요청이 완료되었습니다.");
@@ -146,7 +152,7 @@
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
                     const resultItem = document.createElement("p");
-                    resultItem.innerHTML = `${data.date} ${data.time} - 상태: ${data.status}`;
+                    resultItem.innerHTML = `${data.date} ${data.time} - ${data.reserverName} (${data.people}명) - 상태: ${data.status} - ${data.remarks}`;
                     userResults.appendChild(resultItem);
                 });
             });
@@ -171,7 +177,7 @@
                     const data = doc.data();
                     const bookingItem = document.createElement("div");
                     bookingItem.innerHTML = `
-                        <p>${data.date} ${data.time} - ${data.user} (${data.people}명) - 상태: ${data.status}
+                        <p>${data.date} ${data.time} - ${data.reserverName} (회원번호: ${data.memberId}, ${data.people}명) - 상태: ${data.status} - ${data.remarks}
                         <button onclick="approveBooking('${doc.id}')">승인</button>
                         <button onclick="rejectBooking('${doc.id}')">거절</button></p>
                     `;
