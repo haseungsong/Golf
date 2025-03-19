@@ -71,25 +71,48 @@
         generateTimeOptions();
     });
 
-    // "Status" 버튼 기능 추가
             function openStatusPanel() {
-                document.getElementById("status-popup").style.display = "block";
+            const popup = document.getElementById("status-popup");
+            if (popup) {
+                popup.style.display = "block";
                 loadApprovedBookings();
+            } else {
+                console.error("Status 팝업이 존재하지 않습니다.");
             }
+        }
 
-            function closeStatusPanel() {
-                document.getElementById("status-popup").style.display = "none";
+        function closeStatusPanel() {
+            const popup = document.getElementById("status-popup");
+            if (popup) {
+                popup.style.display = "none";
+            } else {
+                console.error("Status 팝업을 찾을 수 없습니다.");
             }
+        }
 
             function loadApprovedBookings() {
                 db.collection("bookings").where("status", "==", "승인됨").onSnapshot(querySnapshot => {
                     const table = document.getElementById("status-table");
+
+                    // 테이블 초기화 (헤더는 유지)
                     table.innerHTML = "<tr><th>날짜</th><th>시간</th><th>예약자</th><th>인원</th></tr>";
-                    querySnapshot.forEach(doc => {
-                        const data = doc.data();
-                        const row = table.insertRow();
-                        row.innerHTML = `<td>${data.date}</td><td>${data.time}</td><td>${data.reserverName}</td><td>${data.people}</td>`;
-                    });
+
+                    if (querySnapshot.empty) {
+                        // 데이터가 없을 경우
+                        let row = table.insertRow();
+                        row.innerHTML = "<td colspan='4'>승인된 예약이 없습니다.</td>";
+                    } else {
+                        querySnapshot.forEach(doc => {
+                            const data = doc.data();
+                            let row = table.insertRow();
+                            row.insertCell(0).innerText = data.date || "N/A";
+                            row.insertCell(1).innerText = data.time || "N/A";
+                            row.insertCell(2).innerText = data.reserverName || "N/A";
+                            row.insertCell(3).innerText = data.people || "N/A";
+                        });
+                    }
+                }, error => {
+                    console.error("Firestore 데이터 불러오기 오류:", error);
                 });
             }
 
@@ -121,9 +144,8 @@
                 document.getElementById("booking-section").style.display = "block";
                 document.getElementById("user-results").style.display = "block";
 
-                // 로그인 후 관리자 모드 버튼 표시
-                document.getElementById("admin-button").style.display = "block";
-
+                document.getElementById("admin-button").style.display = "block"; // 관리자 버튼 표시
+                document.getElementById("status-button").style.display = "block"; // Status 버튼 표시
                 loadUserBookings();
             }).catch(error => {
                 console.error("로그인 오류: ", error);
