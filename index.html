@@ -376,15 +376,15 @@
         <div id="booking-list"></div>
         <button onclick="closeAdminPanel()">닫기</button>
     </div>
-    <!-- 승인된 예약 팝업 -->
-    <div id="status-popup" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 500px; background: white; border: 1px solid #ccc; padding: 20px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); overflow-y: auto;">
+   <!-- 수정 후 -->
+<div id="status-popup" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 90vw; max-width: 500px; background: white; border: 1px solid #ccc; padding: 20px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); overflow-y: auto; max-height: 90vh;">
         <!-- 날짜 선택 -->
         <h2>예약 가능 시간표</h2>
         <label for="status-date">날짜 선택:</label>
         <input type="date" id="status-date" onchange="renderStatusTable()">
 
         <!-- 시간표 -->
-        <table id="status-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <table id="status-table" style="width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; word-break: break-word; font-size: 14px;">
             <tr><th>시간</th><th>상태</th></tr>
         </table>
         <button onclick="closeStatusPanel()">닫기</button>
