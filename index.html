@@ -48,6 +48,52 @@
             border-left: 2px solid #ccc;
             padding-left: 20px;
         } 
+         /* 예약 테이블 개선 */
+        #status-table th, #status-table td {
+            text-align: center;
+            font-size: 14px;
+        }
+        #status-table tr:hover {
+            opacity: 0.8;
+        }
+        #status-table th {
+            background: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        #status-table td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        @media (max-width: 600px) {
+            #status-popup {
+                width: 95vw;
+                max-width: none;
+                padding: 15px;
+            }
+            #status-table {
+                font-size: 12px;
+            }
+            #status-table th, #status-table td {
+                padding: 6px;
+            }
+        }
+        /* 스타일에 추가 */
+        #status-popup button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 16px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        #status-popup button:hover {
+            opacity: 0.8;
+        }
     </style>
     <script>
         // Firebase 설정
@@ -88,33 +134,7 @@
                 console.error("Status 팝업을 찾을 수 없습니다.");
             }
         }
-
-            function loadApprovedBookings() {
-                db.collection("bookings").where("status", "==", "승인됨").onSnapshot(querySnapshot => {
-                    const table = document.getElementById("status-table");
-
-                    // 테이블 초기화 (헤더는 유지)
-                    table.innerHTML = "<tr><th>날짜</th><th>시간</th><th>예약자</th><th>인원</th></tr>";
-
-                    if (querySnapshot.empty) {
-                        // 데이터가 없을 경우
-                        let row = table.insertRow();
-                        row.innerHTML = "<td colspan='4'>승인된 예약이 없습니다.</td>";
-                    } else {
-                        querySnapshot.forEach(doc => {
-                            const data = doc.data();
-                            let row = table.insertRow();
-                            row.insertCell(0).innerText = data.date || "N/A";
-                            row.insertCell(1).innerText = data.time || "N/A";
-                            row.insertCell(2).innerText = data.reserverName || "N/A";
-                            row.insertCell(3).innerText = data.people || "N/A";
-                        });
-                    }
-                }, error => {
-                    console.error("Firestore 데이터 불러오기 오류:", error);
-                });
-            }
-
+            
             function generateTimeOptions() {
             const timeSelect = document.getElementById("time");
 
@@ -276,15 +296,18 @@
         function closeAdminPanel() {
             document.getElementById("admin-popup").style.display = "none";
         }
-
         function renderStatusTable() {
             const selectedDate = document.getElementById("status-date").value;
             if (!selectedDate) return;
 
             const table = document.getElementById("status-table");
-            table.innerHTML = "<tr><th>시간</th><th>상태</th></tr>";
+            table.innerHTML = `
+                <tr style="background: #f5f5f5;">
+                    <th style="padding:8px; border:1px solid #ccc;">시간</th>
+                    <th style="padding:8px; border:1px solid #ccc;">상태</th>
+                </tr>
+            `;
 
-            // 승인된 시간 가져오기
             db.collection("bookings")
                 .where("date", "==", selectedDate)
                 .where("status", "==", "승인됨")
@@ -295,7 +318,6 @@
                         reservedTimes.push(doc.data().time);
                     });
 
-                    // 시간표 그리기
                     let startHour = 5;
                     let startMinute = 20;
                     let endHour = 11;
@@ -308,16 +330,36 @@
                     while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
                         let timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
                         let row = table.insertRow();
-
-                        // 승인된 시간일 때 회색
+                        
                         if (reservedTimes.includes(timeString)) {
-                            row.style.backgroundColor = '#ccc';
-                            row.insertCell(0).innerText = timeString;
-                            row.insertCell(1).innerText = "예약 완료";
+                            row.style.backgroundColor = '#e0e0e0'; // 회색
                         } else {
-                            row.insertCell(0).innerText = timeString;
-                            row.insertCell(1).innerText = "예약 가능";
+                            row.style.backgroundColor = '#d0f5d0'; // 연두색
+                            row.style.cursor = 'pointer';
+
+                            // ✅ 여기부터 추가된 부분
+                            row.onclick = () => {
+                                // 팝업 닫기
+                                document.getElementById("status-popup").style.display = "none";
+                                // 예약 화면 열기
+                                document.getElementById("booking-section").style.display = "block";
+                                document.getElementById("user-results").style.display = "block";
+                                // 날짜, 시간 자동 채우기
+                                document.getElementById("date").value = selectedDate;
+                                document.getElementById("time").innerHTML = `<option value="${timeString}">${timeString}</option>`;
+                            };
                         }
+
+                        row.onmouseover = () => row.style.opacity = '0.7';
+                        row.onmouseout = () => row.style.opacity = '1';
+
+                        row.insertCell(0).innerText = timeString;
+                        row.insertCell(1).innerText = reservedTimes.includes(timeString) ? "예약 완료" : "예약 가능";
+
+                        row.cells[0].style.padding = "8px";
+                        row.cells[0].style.border = "1px solid #ccc";
+                        row.cells[1].style.padding = "8px";
+                        row.cells[1].style.border = "1px solid #ccc";
 
                         currentMinute += interval;
                         if (currentMinute >= 60) {
@@ -335,7 +377,8 @@
 </head>
 <body>
     <button id="admin-button" onclick="openAdminPanel()">ADM</button>
-    <button id="status-button" onclick="openStatusPanel()" style="position: fixed; top: 10px; left: 100px; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; font-size: 16px;">Status</button>
+    <button id="status-button" onclick="document.getElementById('status-popup').style.display='block'" style="position: fixed; top: 10px; left: 100px; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; font-size: 16px;">Status</button>
+
 
     <!-- 로그인 섹션 -->
     <div id="login-section">
@@ -384,8 +427,19 @@
         <input type="date" id="status-date" onchange="renderStatusTable()">
 
         <!-- 시간표 -->
-        <table id="status-table" style="width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; word-break: break-word; font-size: 14px;">
-            <tr><th>시간</th><th>상태</th></tr>
+        <table id="status-table" style="
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            table-layout: fixed;
+            word-break: break-word;
+            font-size: 14px;
+            border: 1px solid #ccc;
+        ">
+            <tr style="background: #f5f5f5;">
+                <th style="padding: 8px; border: 1px solid #ccc;">시간</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">상태</th>
+            </tr>
         </table>
         <button onclick="closeStatusPanel()">닫기</button>
     </div>
