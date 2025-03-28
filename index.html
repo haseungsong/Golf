@@ -120,22 +120,30 @@
             const timeSelect = document.getElementById("time");
             timeSelect.innerHTML = ""; // 기존 옵션 초기화
 
-            let startHour = 5;  // 시작 시간: 5시
+            let startHour = 5;    // 시작 시간: 5시
             let startMinute = 20; // 시작 분: 20분
-            let endHour = 11;  // 종료 시간: 11시
-            let endMinute = 20; // 종료 분: 20분
-            let interval = 8;  // 간격: 8분
+            let endHour = 11;     // 종료 시간: 11시
+            let endMinute = 20;   // 종료 분: 20분
+            let interval = 8;     // 간격: 8분
 
-            for (let hour = startHour; hour < endHour; hour++) {
-                for (let minutes = 0; minutes < 60; minutes += interval) {
-                    let timeString = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-                    let option = document.createElement("option");
-                    option.value = timeString;
-                    option.textContent = timeString;
-                    timeSelect.appendChild(option);
+            let currentHour = startHour;
+            let currentMinute = startMinute;
+
+            while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
+                let timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+                let option = document.createElement("option");
+                option.value = timeString;
+                option.textContent = timeString;
+                timeSelect.appendChild(option);
+
+                // 8분 증가
+                currentMinute += interval;
+                if (currentMinute >= 60) {
+                    currentMinute -= 60;
+                    currentHour += 1;
                 }
             }
-        }        
+        }  
 
         function googleLogin() {
             const provider = new firebase.auth.GoogleAuthProvider();
