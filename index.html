@@ -68,7 +68,6 @@
         // 로그인 전에는 관리자 버튼 숨김
         document.getElementById("admin-button").style.display = "none";
         document.getElementById("status-button").style.display = "none";
-        generateTimeOptions();
     });
 
             function openStatusPanel() {
@@ -118,32 +117,49 @@
 
             function generateTimeOptions() {
             const timeSelect = document.getElementById("time");
-            timeSelect.innerHTML = ""; // 기존 옵션 초기화
 
-            let startHour = 5;    // 시작 시간: 5시
-            let startMinute = 20; // 시작 분: 20분
-            let endHour = 11;     // 종료 시간: 11시
-            let endMinute = 20;   // 종료 분: 20분
-            let interval = 8;     // 간격: 8분
+            // 실시간으로 firestore의 승인된 예약을 감시함
+            db.collection("bookings").where("status", "==", "승인됨").onSnapshot(snapshot => {
+                // 승인된 시간 목록
+                let reservedTimes = [];
+                snapshot.forEach(doc => {
+                    reservedTimes.push(doc.data().time);
+                });
 
-            let currentHour = startHour;
-            let currentMinute = startMinute;
+                // 드롭다운 초기화
+                timeSelect.innerHTML = "";
 
-            while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
-                let timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
-                let option = document.createElement("option");
-                option.value = timeString;
-                option.textContent = timeString;
-                timeSelect.appendChild(option);
+                // 시간 생성
+                let startHour = 5;
+                let startMinute = 20;
+                let endHour = 11;
+                let endMinute = 20;
+                let interval = 8;
 
-                // 8분 증가
-                currentMinute += interval;
-                if (currentMinute >= 60) {
-                    currentMinute -= 60;
-                    currentHour += 1;
+                let currentHour = startHour;
+                let currentMinute = startMinute;
+
+                while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
+                    let timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+
+                    // 승인된 시간이 아니면 추가
+                    if (!reservedTimes.includes(timeString)) {
+                        let option = document.createElement("option");
+                        option.value = timeString;
+                        option.textContent = timeString;
+                        timeSelect.appendChild(option);
+                    }
+
+                    currentMinute += interval;
+                    if (currentMinute >= 60) {
+                        currentMinute -= 60;
+                        currentHour += 1;
+                    }
                 }
-            }
-        }  
+            }, error => {
+                console.error("실시간 승인된 시간 불러오기 오류:", error);
+            });
+        } 
 
         function googleLogin() {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -154,6 +170,8 @@
 
                 document.getElementById("admin-button").style.display = "block"; // 관리자 버튼 표시
                 document.getElementById("status-button").style.display = "block"; // Status 버튼 표시
+                
+                generateTimeOptions();
                 loadUserBookings();
             }).catch(error => {
                 console.error("로그인 오류: ", error);
