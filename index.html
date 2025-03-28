@@ -276,6 +276,61 @@
         function closeAdminPanel() {
             document.getElementById("admin-popup").style.display = "none";
         }
+
+        function renderStatusTable() {
+            const selectedDate = document.getElementById("status-date").value;
+            if (!selectedDate) return;
+
+            const table = document.getElementById("status-table");
+            table.innerHTML = "<tr><th>시간</th><th>상태</th></tr>";
+
+            // 승인된 시간 가져오기
+            db.collection("bookings")
+                .where("date", "==", selectedDate)
+                .where("status", "==", "승인됨")
+                .get()
+                .then(snapshot => {
+                    const reservedTimes = [];
+                    snapshot.forEach(doc => {
+                        reservedTimes.push(doc.data().time);
+                    });
+
+                    // 시간표 그리기
+                    let startHour = 5;
+                    let startMinute = 20;
+                    let endHour = 11;
+                    let endMinute = 20;
+                    let interval = 8;
+
+                    let currentHour = startHour;
+                    let currentMinute = startMinute;
+
+                    while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
+                        let timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+                        let row = table.insertRow();
+
+                        // 승인된 시간일 때 회색
+                        if (reservedTimes.includes(timeString)) {
+                            row.style.backgroundColor = '#ccc';
+                            row.insertCell(0).innerText = timeString;
+                            row.insertCell(1).innerText = "예약 완료";
+                        } else {
+                            row.insertCell(0).innerText = timeString;
+                            row.insertCell(1).innerText = "예약 가능";
+                        }
+
+                        currentMinute += interval;
+                        if (currentMinute >= 60) {
+                            currentMinute -= 60;
+                            currentHour += 1;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("예약 현황 불러오기 실패:", error);
+                });
+        }
+        
     </script>
 </head>
 <body>
@@ -323,9 +378,14 @@
     </div>
     <!-- 승인된 예약 팝업 -->
     <div id="status-popup" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 500px; background: white; border: 1px solid #ccc; padding: 20px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); overflow-y: auto;">
-        <h2>승인된 예약 현황</h2>
-        <table id="status-table" style="width: 100%; border-collapse: collapse;">
-            <tr><th>날짜</th><th>시간</th><th>예약자</th><th>인원</th></tr>
+        <!-- 날짜 선택 -->
+        <h2>예약 가능 시간표</h2>
+        <label for="status-date">날짜 선택:</label>
+        <input type="date" id="status-date" onchange="renderStatusTable()">
+
+        <!-- 시간표 -->
+        <table id="status-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <tr><th>시간</th><th>상태</th></tr>
         </table>
         <button onclick="closeStatusPanel()">닫기</button>
     </div>
