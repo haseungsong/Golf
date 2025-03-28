@@ -11,7 +11,6 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
             justify-content: space-between;
             padding: 20px;
         }
@@ -41,13 +40,37 @@
             overflow-y: auto;
         }
         #booking-section {
-            width: 50%;
+            width: 100%;
+        }
+
+        #booking-section input, 
+        #booking-section select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+        }
+
+        #booking-section button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            background: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #booking-section button:hover {
+            opacity: 0.9;
         }
         #user-results {
-            width: 40%;
-            border-left: 2px solid #ccc;
-            padding-left: 20px;
-        } 
+            width: 100%;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+        }
          /* 예약 테이블 개선 */
         #status-table th, #status-table td {
             text-align: center;
@@ -93,6 +116,14 @@
 
         #status-popup button:hover {
             opacity: 0.8;
+        }
+        #main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
         }
     </style>
     <script>
@@ -386,32 +417,44 @@
         <button onclick="googleLogin()">Google 계정으로 로그인</button>
     </div>
 
-    <!-- 예약 신청 섹션 -->
-    <div id="booking-section" style="display:none;">
-        <h2>골프장 예약</h2>
-        <label for="date">날짜:</label>
-        <input type="date" id="date"><br>
+    <!-- ✅ 세로 배치 구조로 변경된 코드 -->
+    <div id="main-container" style="display:none; flex-direction: column; gap: 20px; width: 100%;">
 
-        <label for="time">시간:</label>
-        <select id="time"></select><br>
+        <!-- 예약 신청 섹션 -->
+        <div id="booking-section">
+            <h2>골프장 예약</h2>
+            <label for="date">날짜:</label>
+            <input type="date" id="date"><br>
 
-        <label for="people">인원수:</label>
-        <input type="number" id="people" min="1" max="4"><br>
+            <label for="time">시간:</label>
+            <select id="time"></select><br>
 
-        <label for="member-id">회원번호:</label>
-        <input type="text" id="member-id"><br>
+            <label for="people">인원수:</label>
+            <input type="number" id="people" min="1" max="4"><br>
 
-        <label for="reserver-name">예약자명:</label>
-        <input type="text" id="reserver-name"><br>
+            <label for="member-id">회원번호:</label>
+            <input type="text" id="member-id"><br>
 
-        <label for="remarks">비고:</label>
-        <input type="text" id="remarks" placeholder="예: 10번홀부터"><br>
+            <label for="reserver-name">예약자명:</label>
+            <input type="text" id="reserver-name"><br>
 
-        <button onclick="bookTimeSlot()">예약 신청</button>
+            <label for="remarks">비고:</label>
+            <input type="text" id="remarks" placeholder="예: 10번홀부터"><br>
+
+            <button onclick="bookTimeSlot()">예약 신청</button>
+        </div>
+
+        <!-- 구분선 -->
+        <hr style="margin: 20px 0; border: none; border-top: 2px solid #ccc;">
+
+        <!-- 사용자 예약 결과 -->
+        <div id="user-results">
+            <h2>예약 결과</h2>
+            <!-- 예약 내역이 여기에 들어감 -->
+        </div>
+
     </div>
 
-    <!-- 사용자 예약 결과 -->
-    <div id="user-results" style="display:none;"></div>
 
     <!-- 관리자 팝업 -->
     <div id="admin-popup">
