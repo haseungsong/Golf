@@ -216,8 +216,8 @@
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider).then(result => {
                 document.getElementById("login-section").style.display = "none";
-                document.getElementById("booking-section").style.display = "block";
-                document.getElementById("user-results").style.display = "block";
+                document.getElementById("main-container").style.display = "flex";   // 🔥 이거만 켜면 됨
+
 
                 document.getElementById("admin-button").style.display = "block"; // 관리자 버튼 표시
                 document.getElementById("status-button").style.display = "block"; // Status 버튼 표시
